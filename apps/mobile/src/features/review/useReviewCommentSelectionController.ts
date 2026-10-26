@@ -105,6 +105,7 @@ export function useReviewCommentSelectionController(input: {
   useEffect(() => {
     clearReviewCommentTarget();
     setPendingNativeCommentSelection(null);
+    // oxlint-disable-next-line react/exhaustive-effect-dependencies -- Changing sections clears the previous section's comment selection.
   }, [selectedSection?.id]);
 
   useEffect(() => {
