@@ -28,7 +28,10 @@ export function findProjectForChangeRequest<Project extends ChangeRequestProject
   });
 }
 
-/** Prefers the project checked out from the link's repository, else lends any project on its host. */
+/**
+ * Prefers the project checked out from the link's repository, else lends any project on its host.
+ * A host that reads change requests without a checkout can borrow any project at all.
+ */
 export function findProjectOnChangeRequestHost<Project extends ChangeRequestProject>(
   projects: ReadonlyArray<Project>,
   link: ChangeRequestLink,
@@ -41,7 +44,11 @@ export function findProjectOnChangeRequestHost<Project extends ChangeRequestProj
         identity?.provider !== undefined &&
         sourceControlClients.get(identity.provider).canReadChangeRequestOnHost(identity, link)
       );
-    })
+    }) ??
+    (link.authority === undefined &&
+    sourceControlClients.findByPublicHost(link.host)?.readsPublicHostWithoutCheckout === true
+      ? projects[0]
+      : undefined)
   );
 }
 
