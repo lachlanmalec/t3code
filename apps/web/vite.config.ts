@@ -367,9 +367,11 @@ export default defineConfig(() => {
                 test: /\/node_modules\/(?:react|react-dom|scheduler)\//,
                 includeDependenciesRecursively: false,
               },
+              // The icon map reads video extensions at load, so their modules
+              // share its chunk; elsewhere they'd import back into it in a cycle.
               {
                 name: "icons",
-                test: /\/(?:components\/chat\/PierreEntryIcon\.tsx|pierre-icons\.ts|mediaPreview\.ts)$/,
+                test: /\/(?:components\/chat\/PierreEntryIcon\.tsx|pierre-icons\.ts|mediaPreview\.ts|shared\/src\/(?:video|image)\.ts)$/,
                 includeDependenciesRecursively: false,
               },
             ],
