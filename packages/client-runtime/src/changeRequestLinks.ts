@@ -30,11 +30,13 @@ export function findProjectForChangeRequest<Project extends ChangeRequestProject
 
 /**
  * Prefers the project checked out from the link's repository, else lends any project on its host.
- * A host that reads change requests without a checkout can borrow any project at all.
+ * A host that reads change requests without a checkout can borrow any project at all, the
+ * preferred one (the thread's own) first: actions on the change request start work in it.
  */
 export function findProjectOnChangeRequestHost<Project extends ChangeRequestProject>(
   projects: ReadonlyArray<Project>,
   link: ChangeRequestLink,
+  preferredProjectId?: ProjectId,
 ): Project | undefined {
   return (
     findProjectForChangeRequest(projects, link) ??
@@ -47,7 +49,7 @@ export function findProjectOnChangeRequestHost<Project extends ChangeRequestProj
     }) ??
     (link.authority === undefined &&
     sourceControlClients.findByPublicHost(link.host)?.readsPublicHostWithoutCheckout === true
-      ? projects[0]
+      ? (projects.find((project) => project.id === preferredProjectId) ?? projects[0])
       : undefined)
   );
 }
@@ -60,7 +62,8 @@ export interface ChangeRequestLinkCapabilities {
 /**
  * Where every client opens a change request link in the app, or null for the browser. A link
  * opened into a pull request view may borrow any project on its host when the server reads
- * change requests by host, so a mirror's or a sibling repository's link still opens in the app.
+ * change requests by host, so a mirror's or a sibling repository's link still opens in the app;
+ * see findProjectOnChangeRequestHost for hosts that need no project on them at all.
  */
 export function resolveChangeRequestLinkTarget<Project extends ChangeRequestProject>({
   url,

@@ -92,35 +92,37 @@ describe("findProjectOnChangeRequestHost", () => {
     ).toBe(frontend);
   });
 
-  const tablogs = { id: "tablogs", repositoryIdentity: null } as never;
+  const workspace = { id: "workspace", repositoryIdentity: null } as never;
+  const bitbucketLink = { host: "bitbucket.org", repository: "acme/app", number: 7 };
 
   it("lends a project without a remote to a host that reads change requests without a checkout", () => {
+    expect(findProjectOnChangeRequestHost([workspace], bitbucketLink)).toBe(workspace);
+  });
+
+  it("lends the preferred project to a host that reads without a checkout", () => {
     expect(
-      findProjectOnChangeRequestHost([tablogs], {
-        host: "bitbucket.org",
-        repository: "tablogs-workspace/testlab360",
-        number: 602,
-      }),
-    ).toBe(tablogs);
+      findProjectOnChangeRequestHost(
+        [frontend, workspace],
+        bitbucketLink,
+        ProjectId.make("workspace"),
+      ),
+    ).toBe(workspace);
   });
 
   it("lends nothing on a public host whose provider needs a checkout", () => {
     expect(
-      findProjectOnChangeRequestHost([tablogs], {
-        host: "gitlab.com",
-        repository: "acme/app",
-        number: 1,
-      }),
+      findProjectOnChangeRequestHost([workspace], { ...bitbucketLink, host: "gitlab.com" }),
     ).toBeUndefined();
   });
 
-  it("lends nothing on a self-hosted server or a lookalike host", () => {
-    for (const host of ["bitbucket.acme.test", "github.com-evil.test"]) {
+  it.each(["bitbucket.acme.test", "github.com-evil.test"])(
+    "lends nothing on a self-hosted server or a lookalike host (%s)",
+    (host) => {
       expect(
-        findProjectOnChangeRequestHost([tablogs], { host, repository: "acme/app", number: 1 }),
+        findProjectOnChangeRequestHost([workspace], { ...bitbucketLink, host }),
       ).toBeUndefined();
-    }
-  });
+    },
+  );
 });
 
 describe("resolveChangeRequestLinkTarget", () => {
@@ -192,24 +194,24 @@ describe("resolveChangeRequestLinkTarget", () => {
   });
 
   it("opens a host that reads without a checkout under a project with no remote", () => {
-    const tablogs = {
-      id: ProjectId.make("tablogs"),
+    const workspace = {
+      id: ProjectId.make("workspace"),
       environmentId: local,
       repositoryIdentity: null,
     };
     const resolve = (lendHostProject: boolean) =>
       resolveChangeRequestLinkTarget({
-        url: "https://bitbucket.org/tablogs-workspace/testlab360/pull-requests/602",
-        projects: [tablogs],
+        url: "https://bitbucket.org/acme/app/pull-requests/7",
+        projects: [workspace],
         capabilities: hostReads,
         environmentId: local,
         lendHostProject,
       });
     expect(resolve(true)).toEqual({
-      project: tablogs,
+      project: workspace,
       host: "bitbucket.org",
-      repository: "tablogs-workspace/testlab360",
-      number: 602,
+      repository: "acme/app",
+      number: 7,
     });
     expect(resolve(false)).toBeNull();
   });

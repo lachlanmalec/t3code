@@ -1,5 +1,10 @@
 import { ThreadDetailsControl } from "./ThreadDetailsControl";
-import type { EnvironmentId, ScopedThreadRef, ThreadPullRequestLink } from "@t3tools/contracts";
+import type {
+  EnvironmentId,
+  ProjectId,
+  ScopedThreadRef,
+  ThreadPullRequestLink,
+} from "@t3tools/contracts";
 import {
   pullRequestListLines,
   resolveThreadPullRequestChains,
@@ -12,7 +17,7 @@ import { useState, type ComponentProps, type MouseEvent as ReactMouseEvent } fro
 import { sourceControlClients } from "@t3tools/client-runtime/source-control-clients";
 import { findProjectOnChangeRequestHost } from "@t3tools/client-runtime/change-request-links";
 
-import { useProjects } from "~/state/entities";
+import { useProjects, useQuietThreadShell } from "~/state/entities";
 import { threadEnvironment } from "~/state/threads";
 import { useAtomCommand } from "~/state/use-atom-command";
 
@@ -23,12 +28,14 @@ import { ThreadDetailsPrRow } from "./ThreadDetailsPrRow";
 
 function ThreadDetailsPrLinkRow({
   environmentId,
+  threadProjectId,
   link,
   onOpen,
   onActed,
   onStopWatching,
 }: {
   environmentId: EnvironmentId;
+  threadProjectId: ProjectId | undefined;
   link: ThreadPullRequestLink;
   onOpen: (event: ReactMouseEvent<HTMLElement>) => void;
   onActed?: (() => void) | undefined;
@@ -42,6 +49,7 @@ function ThreadDetailsPrLinkRow({
       : (findProjectOnChangeRequestHost(
           projects.filter((candidate) => candidate.environmentId === environmentId),
           parsed,
+          threadProjectId,
         ) ?? null);
   const linked = linkedPullRequestSnapshotStatus(link);
   const pr = linked?.pr ?? null;
@@ -75,6 +83,7 @@ export function ThreadDetailsPrRows({
   onOpenLink: (event: ReactMouseEvent<HTMLElement>, url: string) => void;
 }) {
   const [expanded, setExpanded] = useState(false);
+  const threadProjectId = useQuietThreadShell(threadRef)?.projectId;
   const watch = useAtomCommand(threadEnvironment.watchPullRequest, { reportFailure: true });
   const stopWatching = (link: ThreadPullRequestLink | null) =>
     link?.watch === undefined
@@ -108,6 +117,7 @@ export function ThreadDetailsPrRows({
             <ThreadDetailsPrLinkRow
               key={threadPullRequestKeyOf(link)}
               environmentId={row.environmentId}
+              threadProjectId={threadProjectId}
               link={link}
               onOpen={(event) => onOpenLink(event, link.url)}
               onActed={row.onActed}
