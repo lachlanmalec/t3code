@@ -104,11 +104,13 @@ export function useReviewCommentSelectionController(input: {
 
   useEffect(() => {
     clearReviewCommentTarget();
+    // oxlint-disable-next-line react/set-state-in-effect -- Changing sections clears the previous section's native comment selection.
     setPendingNativeCommentSelection(null);
   }, [selectedSection?.id]);
 
   useEffect(() => {
     if (activeCommentTarget === null) {
+      // oxlint-disable-next-line react/set-state-in-effect -- Closing the comment target clears the pending native selection.
       setPendingNativeCommentSelection(null);
     }
   }, [activeCommentTarget]);
