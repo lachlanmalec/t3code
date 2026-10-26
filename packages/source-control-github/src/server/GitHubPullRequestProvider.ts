@@ -335,7 +335,6 @@ export const make = Effect.gen(function* () {
     kind: SourceControlProviderKind.make("github"),
     capabilities: CAPABILITIES,
     unavailableRequirement: UNAVAILABLE_REQUIREMENT,
-    readsPublicHostWithoutCheckout: true,
     mergeMessageRewrite: removeAgentCredits,
     getRoutingIdentity: (input) =>
       cli.getRoutingIdentity(input).pipe(Effect.mapError(fail("routeIdentity"))),

@@ -4367,3 +4367,52 @@ it.effect.each(["expiry", "commit expiry", "cache hit", "commit cache hit", "ref
       assert.strictEqual(diffReads, 2);
     }),
 );
+
+it.effect("reads a change request on a public host from a project with no checkout of it", () =>
+  Effect.gen(function* () {
+    const reads: Array<{ repository: string; host: string; number: number }> = [];
+    const service = yield* makeService({
+      projects: [project({ id: "tablogs", title: "TabLogs", workspaceRoot: "/w/tablogs" })],
+      providers: [
+        fakePullRequestProvider(SourceControlProviderKind.make("bitbucket"), {
+          getChangeRequest: ({ repository, host, number }) => {
+            reads.push({ repository, host, number });
+            return Effect.succeed(hostedChangeRequest("Description"));
+          },
+        }),
+      ],
+    });
+
+    yield* service.detail({
+      projectId: "tablogs" as ProjectId,
+      host: "bitbucket.org",
+      repository: "acme/app",
+      number: 7,
+    });
+
+    assert.deepStrictEqual(reads, [{ repository: "acme/app", host: "bitbucket.org", number: 7 }]);
+  }),
+);
+
+it.effect("still refuses a public host whose provider needs a checkout", () =>
+  Effect.gen(function* () {
+    const service = yield* makeService({
+      projects: [project({ id: "tablogs", title: "TabLogs", workspaceRoot: "/w/tablogs" })],
+      providers: [fakePullRequestProvider(SourceControlProviderKind.make("gitlab"))],
+    });
+
+    const error = yield* Effect.flip(
+      service.detail({
+        projectId: "tablogs" as ProjectId,
+        host: "gitlab.com",
+        repository: "acme/app",
+        number: 7,
+      }),
+    );
+
+    assert.strictEqual(error._tag, "PullRequestUnavailableError");
+    if (error._tag === "PullRequestUnavailableError") {
+      assert.strictEqual(error.reason, "provider-unsupported");
+    }
+  }),
+);

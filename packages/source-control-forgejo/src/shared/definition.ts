@@ -66,6 +66,7 @@ export const definition = defineSourceControl({
   repositoryPathHint: "owner/repo",
   // Codeberg is the public Forgejo; any other server is self-hosted.
   publicHost: "codeberg.org",
+  readsPublicHostWithoutCheckout: true,
   publishDescription: "Your signed-in server",
   publishHost: (signedInHost) => signedInHost ?? "your server",
   newRepositoryOwner: (account) => (account ? { owner: account } : null),

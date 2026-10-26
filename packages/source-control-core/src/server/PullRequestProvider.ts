@@ -295,11 +295,6 @@ export interface PullRequestProviderApi {
   readonly mergeMessageRewrite?: (message: string) => string;
   /** Use matching checkout keys instead of `owner/name`. */
   readonly repositoryKey?: (input: { readonly canonicalKey: string }) => string;
-  /**
-   * Names the repository in every request and authenticates by host, so a change request on the
-   * definition's `publicHost` can be read from a project with no checkout of its repository.
-   */
-  readonly readsPublicHostWithoutCheckout?: boolean;
 
   readonly getViewer: (input: {
     readonly cwd: string;

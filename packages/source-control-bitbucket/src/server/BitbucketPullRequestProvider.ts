@@ -149,7 +149,6 @@ export const make = Effect.gen(function* () {
     kind: SourceControlProviderKind.make("bitbucket"),
     capabilities: CAPABILITIES,
     unavailableRequirement: UNAVAILABLE_REQUIREMENT,
-    readsPublicHostWithoutCheckout: true,
 
     getViewer: () => api.getViewer().pipe(Effect.mapError(fail("getViewer"))),
 

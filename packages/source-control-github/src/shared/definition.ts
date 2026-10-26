@@ -67,6 +67,7 @@ export const definition = defineSourceControl({
   },
   repositoryPathHint: "owner/repo",
   publicHost: "github.com",
+  readsPublicHostWithoutCheckout: true,
   publishDescription: "github.com",
   publishHost: () => "github.com",
   newRepositoryOwner: (account) => ({ owner: account }),

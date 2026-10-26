@@ -505,9 +505,6 @@ function withRateLimitBackoff(
       ? {}
       : { unavailableRequirement: api.unavailableRequirement }),
     ...(api.repositoryKey === undefined ? {} : { repositoryKey: api.repositoryKey }),
-    ...(api.readsPublicHostWithoutCheckout === undefined
-      ? {}
-      : { readsPublicHostWithoutCheckout: api.readsPublicHostWithoutCheckout }),
     getViewer:
       options?.viewerAllowsPause === true
         ? interactive("getViewer", api.getViewer)
@@ -965,8 +962,11 @@ export const make = Effect.gen(function* () {
             if (route === undefined) {
               return Effect.gen(function* () {
                 const publicHost = sourceControlDefinitions.findByPublicHost(host);
-                const api = publicHost === undefined ? null : registry.get(publicHost.kind);
-                if (api?.readsPublicHostWithoutCheckout) {
+                const api =
+                  publicHost?.readsPublicHostWithoutCheckout === true
+                    ? registry.get(publicHost.kind)
+                    : null;
+                if (api) {
                   const selected = yield* projects.getShell(ref.projectId).pipe(
                     Effect.mapError(
                       (cause) =>

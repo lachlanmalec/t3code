@@ -76,6 +76,7 @@ export const definition = defineSourceControl({
   },
   repositoryPathHint: "workspace/repository",
   publicHost: "bitbucket.org",
+  readsPublicHostWithoutCheckout: true,
   publishDescription: "bitbucket.org",
   publishHost: () => "bitbucket.org",
   // The signed-in account does not identify a workspace.

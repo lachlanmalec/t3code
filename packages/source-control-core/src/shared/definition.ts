@@ -210,6 +210,11 @@ export interface SourceControlDefinition {
   readonly changeRequest: ChangeRequestTerminology;
   readonly repositoryPathHint: string;
   readonly publicHost: string | null;
+  /**
+   * Names the repository in every request and authenticates by host, so a change request on
+   * `publicHost` can be read from a project with no checkout of its repository.
+   */
+  readonly readsPublicHostWithoutCheckout?: true;
   readonly publishDescription: string;
   readonly publishHost: (signedInHost: string | null) => string;
   readonly newRepositoryOwner: (account: string | null) => { readonly owner: string | null } | null;
